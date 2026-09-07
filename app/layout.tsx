@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full bg-background font-sans text-ink">
+      <body className="min-h-full bg-transparent font-sans text-ink">
         <Script id="theme-init" strategy="beforeInteractive">
           {`try {
             var t = localStorage.getItem('theme');

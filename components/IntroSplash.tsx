@@ -45,7 +45,7 @@ export function IntroSplash() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#050816] transition-opacity duration-450 ${
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#050816] transition-opacity duration-450 pointer-events-auto ${
         leaving ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
       role="dialog"

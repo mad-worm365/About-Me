@@ -3,22 +3,22 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f5f7fb;
+  --background: rgba(245, 247, 251, 0.78);
   --ink: #0f172a;
   --muted: #64748b;
-  --surface: rgba(255, 255, 255, 0.88);
-  --surface-2: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-2: rgba(248, 250, 252, 0.82);
   --line: #e2e8f0;
   --slider-track: #e2e8f0;
   color-scheme: light;
 }
 
 .dark {
-  --background: #0b1020;
+  --background: rgba(11, 16, 32, 0.42);
   --ink: #eef2ff;
   --muted: #94a3b8;
-  --surface: rgba(21, 27, 46, 0.78);
-  --surface-2: #1c2438;
+  --surface: rgba(21, 27, 46, 0.62);
+  --surface-2: rgba(28, 36, 56, 0.7);
   --line: #2a3550;
   --slider-track: #2a3550;
   color-scheme: dark;
@@ -60,10 +60,10 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  transition: color 0.35s ease;
 }
 
 ::selection {
@@ -289,6 +289,64 @@ html.custom-cursor textarea,
 html.custom-cursor select,
 html.custom-cursor [contenteditable="true"] {
   cursor: text !important;
+}
+
+.cyber-ocean-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: auto;
+}
+
+.cyber-ocean-bg canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.cyber-ocean-fallback {
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(59, 130, 246, 0.18), transparent 55%),
+    #030712;
+}
+
+.cyber-ocean-veil {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.2) 0%, rgba(3, 7, 18, 0.08) 40%, rgba(3, 7, 18, 0.55) 100%),
+    linear-gradient(90deg, rgba(5, 8, 22, 0.35), transparent 30%, transparent 70%, rgba(5, 8, 22, 0.35));
+}
+
+.dark .cyber-ocean-veil {
+  background:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.15) 0%, rgba(3, 7, 18, 0.05) 45%, rgba(3, 7, 18, 0.45) 100%),
+    linear-gradient(90deg, rgba(5, 8, 22, 0.25), transparent 28%, transparent 72%, rgba(5, 8, 22, 0.25));
+}
+
+.ocean-ui {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.ocean-ui a,
+.ocean-ui button,
+.ocean-ui input,
+.ocean-ui textarea,
+.ocean-ui select,
+.ocean-ui label,
+.ocean-ui summary,
+.ocean-ui nav,
+.ocean-ui header,
+.ocean-ui footer,
+.ocean-ui form,
+.ocean-ui article,
+.ocean-ui [role="button"],
+.ocean-ui [data-interactive],
+.ocean-ui .slider-bar {
+  pointer-events: auto;
 }
 
 .btn-shine {
