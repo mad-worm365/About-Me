@@ -7,6 +7,7 @@ import { CTA } from "@/components/CTA";
 import { Focus } from "@/components/Focus";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
+import { IntroSplash } from "@/components/IntroSplash";
 import { Navbar } from "@/components/Navbar";
 import { Projects } from "@/components/Projects";
 import { Skills } from "@/components/Skills";
@@ -16,6 +17,7 @@ import { Testimonials } from "@/components/Testimonials";
 export default function Home() {
   return (
     <div className="flex min-h-full flex-col">
+      <IntroSplash />
       <Navbar />
       <main>
         <Hero />
