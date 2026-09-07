@@ -3,7 +3,6 @@ import { BackToTop } from "@/components/BackToTop";
 import { Blog } from "@/components/Blog";
 import { Contact } from "@/components/Contact";
 import { CTA } from "@/components/CTA";
-import { CursorBuddy } from "@/components/CursorBuddy";
 import { Focus } from "@/components/Focus";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
@@ -38,7 +37,6 @@ export default function Home() {
         </main>
         <Footer />
         <BackToTop />
-        <CursorBuddy />
       </div>
     </>
   );

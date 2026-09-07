@@ -206,58 +206,6 @@ body {
   }
 }
 
-@keyframes click-spark {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--spark-rot, 0deg))
-      scale(calc(var(--spark-scale, 1) * 0.35));
-  }
-  18% {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(calc(var(--spark-rot, 0deg) + 8deg))
-      scale(calc(var(--spark-scale, 1) * 1.08));
-  }
-  55% {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--spark-rot, 0deg))
-      scale(var(--spark-scale, 1));
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(calc(var(--spark-rot, 0deg) - 6deg))
-      scale(calc(var(--spark-scale, 1) * 1.35));
-  }
-}
-
-@keyframes click-particle {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-28px) scale(0.4);
-  }
-}
-
-@keyframes hand-tap {
-  0% {
-    opacity: 0.85;
-    transform: translateY(-10px) scale(0.92);
-  }
-  18% {
-    opacity: 1;
-    transform: translateY(2px) scale(1.06);
-  }
-  40% {
-    transform: translateY(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(4px) scale(1.04);
-  }
-}
-
 @keyframes intro-dial-spin {
   0% {
     transform: rotate(0deg);
@@ -281,18 +229,6 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-html.custom-cursor,
-html.custom-cursor * {
-  cursor: none !important;
-}
-
-html.custom-cursor input,
-html.custom-cursor textarea,
-html.custom-cursor select,
-html.custom-cursor [contenteditable="true"] {
-  cursor: text !important;
 }
 
 .cyber-ocean-bg {
