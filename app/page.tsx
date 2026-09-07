@@ -1,6 +1,7 @@
 import { About } from "@/components/About";
 import { BackToTop } from "@/components/BackToTop";
 import { Blog } from "@/components/Blog";
+import { ClickSparkles } from "@/components/ClickSparkles";
 import { Contact } from "@/components/Contact";
 import { CTA } from "@/components/CTA";
 import { Focus } from "@/components/Focus";
@@ -37,6 +38,7 @@ export default function Home() {
         </main>
         <Footer />
         <BackToTop />
+        <ClickSparkles />
       </div>
     </>
   );

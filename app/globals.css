@@ -206,6 +206,49 @@ body {
   }
 }
 
+@keyframes click-spark-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--spark-angle)) translateY(0)
+      scale(0.35);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--spark-angle))
+      translateY(calc(var(--spark-dist) * -1)) scale(0.55);
+  }
+}
+
+.click-spark-particle {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: click-spark-burst 480ms cubic-bezier(0.16, 0.84, 0.32, 1) forwards;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
+}
+
+.click-spark-ray {
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(186, 230, 253, 0.7);
+}
+
+.click-spark-white {
+  background: #ffffff;
+}
+
+.click-spark-ice {
+  background: #bae6fd;
+}
+
+.click-spark-speck {
+  border-radius: 1px;
+}
+
 @keyframes intro-dial-spin {
   0% {
     transform: rotate(0deg);
