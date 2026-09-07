@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const STORAGE_KEY = "madworm-intro-seen";
 
 export function IntroSplash() {
   const [visible, setVisible] = useState(false);
-  const [ready, setReady] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const dismissed = useRef(false);
+
+  const dismiss = () => {
+    if (dismissed.current) return;
+    dismissed.current = true;
+    setLeaving(true);
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {
+      // ignore
+    }
+    window.setTimeout(() => setVisible(false), 450);
+  };
 
   useEffect(() => {
     try {
@@ -18,28 +30,16 @@ export function IntroSplash() {
     } catch {
       // ignore
     }
+
     setVisible(true);
 
-    const timer = window.setTimeout(() => setReady(true), 3000);
+    // Auto-open main page when the 3s dial finishes
+    const timer = window.setTimeout(() => {
+      dismiss();
+    }, 3000);
+
     return () => window.clearTimeout(timer);
   }, []);
-
-  const dismiss = () => {
-    setLeaving(true);
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // ignore
-    }
-    window.setTimeout(() => setVisible(false), 450);
-  };
-
-  const learnMore = () => {
-    dismiss();
-    window.setTimeout(() => {
-      document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
-    }, 480);
-  };
 
   if (!visible) return null;
 
@@ -87,11 +87,8 @@ export function IntroSplash() {
 
         <button
           type="button"
-          onClick={learnMore}
-          disabled={!ready}
-          className={`mt-10 inline-flex min-w-[260px] items-center justify-center gap-2 border border-cyan-400/80 bg-[#0a1630]/80 px-8 py-3 font-mono text-[12px] tracking-[0.22em] text-cyan-200 uppercase transition [clip-path:polygon(12px_0,100%_0,calc(100%-12px)_100%,0_100%)] hover:bg-cyan-400/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[300px] sm:text-[13px] ${
-            ready ? "animate-[intro-btn-in_0.45s_ease_both]" : ""
-          }`}
+          onClick={dismiss}
+          className="mt-10 inline-flex min-w-[260px] items-center justify-center gap-2 border border-cyan-400/80 bg-[#0a1630]/80 px-8 py-3 font-mono text-[12px] tracking-[0.22em] text-cyan-200 uppercase transition [clip-path:polygon(12px_0,100%_0,calc(100%-12px)_100%,0_100%)] hover:bg-cyan-400/10 hover:text-white sm:min-w-[300px] sm:text-[13px]"
         >
           Learn more about me
         </button>
@@ -99,10 +96,7 @@ export function IntroSplash() {
         <button
           type="button"
           onClick={dismiss}
-          disabled={!ready}
-          className={`mt-4 font-mono text-[11px] tracking-[0.16em] text-slate-400 transition hover:text-cyan-200 disabled:opacity-30 ${
-            ready ? "animate-[intro-btn-in_0.55s_ease_both]" : ""
-          }`}
+          className="mt-4 font-mono text-[11px] tracking-[0.16em] text-slate-400 transition hover:text-cyan-200"
         >
           or continue without sound
         </button>
