@@ -14,6 +14,7 @@ import { Projects } from "@/components/Projects";
 import { Skills } from "@/components/Skills";
 import { Stats } from "@/components/Stats";
 import { Testimonials } from "@/components/Testimonials";
+import { WarpCTA } from "@/components/WarpCTA";
 
 export default function Home() {
   return (
@@ -24,6 +25,7 @@ export default function Home() {
         <Navbar />
         <main>
           <Hero />
+          <WarpCTA />
           <Stats />
           <About />
           <Skills />
