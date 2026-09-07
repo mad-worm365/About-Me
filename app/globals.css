@@ -206,6 +206,66 @@ body {
   }
 }
 
+@keyframes click-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(0deg);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.05) rotate(8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35) rotate(-6deg);
+  }
+}
+
+@keyframes click-particle {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-28px) scale(0.4);
+  }
+}
+
+@keyframes hand-tap {
+  0% {
+    opacity: 0.85;
+    transform: translateY(-10px) scale(0.92);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.06);
+  }
+  40% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(1.04);
+  }
+}
+
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none !important;
+}
+
+html.custom-cursor input,
+html.custom-cursor textarea,
+html.custom-cursor select,
+html.custom-cursor [contenteditable="true"] {
+  cursor: text !important;
+}
+
 .btn-shine {
   position: relative;
   overflow: hidden;
