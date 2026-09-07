@@ -1,52 +1,41 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-const STORAGE_KEY = "madworm-intro-seen";
+import { useEffect, useState } from "react";
 
 export function IntroSplash() {
-  const [visible, setVisible] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const dismissed = useRef(false);
-
-  const dismiss = () => {
-    if (dismissed.current) return;
-    dismissed.current = true;
-    setLeaving(true);
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // ignore
-    }
-    window.setTimeout(() => setVisible(false), 450);
-  };
+  const [phase, setPhase] = useState<"boot" | "show" | "hide" | "done">("boot");
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") {
-        setVisible(false);
-        return;
-      }
-    } catch {
-      // ignore
-    }
+    // Show splash immediately on start
+    setPhase("show");
 
-    setVisible(true);
-
-    // Auto-open main page when the 3s dial finishes
-    const timer = window.setTimeout(() => {
-      dismiss();
+    // After 3s dial, begin fade-out
+    const hideTimer = window.setTimeout(() => {
+      setPhase("hide");
     }, 3000);
 
-    return () => window.clearTimeout(timer);
+    // After fade, remove splash so main page is fully interactive
+    const doneTimer = window.setTimeout(() => {
+      setPhase("done");
+    }, 3600);
+
+    return () => {
+      window.clearTimeout(hideTimer);
+      window.clearTimeout(doneTimer);
+    };
   }, []);
 
-  if (!visible) return null;
+  const skipNow = () => {
+    setPhase("hide");
+    window.setTimeout(() => setPhase("done"), 400);
+  };
+
+  if (phase === "boot" || phase === "done") return null;
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#050816] transition-opacity duration-450 pointer-events-auto ${
-        leaving ? "pointer-events-none opacity-0" : "opacity-100"
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#050816] pointer-events-auto transition-opacity duration-500 ${
+        phase === "hide" ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       role="dialog"
       aria-modal="true"
@@ -87,7 +76,7 @@ export function IntroSplash() {
 
         <button
           type="button"
-          onClick={dismiss}
+          onClick={skipNow}
           className="mt-10 inline-flex min-w-[260px] items-center justify-center gap-2 border border-cyan-400/80 bg-[#0a1630]/80 px-8 py-3 font-mono text-[12px] tracking-[0.22em] text-cyan-200 uppercase transition [clip-path:polygon(12px_0,100%_0,calc(100%-12px)_100%,0_100%)] hover:bg-cyan-400/10 hover:text-white sm:min-w-[300px] sm:text-[13px]"
         >
           Learn more about me
@@ -95,7 +84,7 @@ export function IntroSplash() {
 
         <button
           type="button"
-          onClick={dismiss}
+          onClick={skipNow}
           className="mt-4 font-mono text-[11px] tracking-[0.16em] text-slate-400 transition hover:text-cyan-200"
         >
           or continue without sound
