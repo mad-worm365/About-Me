@@ -23,9 +23,9 @@ export default function Home() {
       <div className="ocean-ui flex min-h-full flex-col">
         <IntroSplash />
         <Navbar />
+        <WarpCTA />
         <main>
           <Hero />
-          <WarpCTA />
           <Stats />
           <About />
           <Skills />

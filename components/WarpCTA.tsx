@@ -192,37 +192,35 @@ export function WarpCTA() {
   }, []);
 
   return (
-    <section className="mx-auto max-w-6xl px-5 pb-6 pt-2 lg:px-8">
-      <div className="cta-warp relative overflow-hidden rounded-[2rem]">
-        <canvas ref={canvasRef} className="cta-warp-canvas" aria-hidden />
-        <div className="relative z-10 flex flex-col items-center px-6 py-16 text-center sm:px-10 sm:py-20">
-          <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Start Building
-            <br />
-            <span className="bg-linear-to-r from-sky-300 to-violet-300 bg-clip-text text-transparent">
-              with Mad Worm today
-            </span>
-          </h2>
-          <div className="mt-8">
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:scale-[1.03]"
+    <section className="cta-warp relative w-full overflow-hidden">
+      <canvas ref={canvasRef} className="cta-warp-canvas" aria-hidden />
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 py-14 text-center sm:px-8 sm:py-16 lg:py-20">
+        <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          Start Building
+          <br />
+          <span className="bg-linear-to-r from-sky-300 to-violet-300 bg-clip-text text-transparent">
+            with Mad Worm today
+          </span>
+        </h2>
+        <div className="mt-8">
+          <a
+            href="#contact"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:scale-[1.03]"
+          >
+            Get In Touch
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              aria-hidden
             >
-              Get In Touch
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                aria-hidden
-              >
-                <path
-                  d="M 4.697 14.125 L 5.875 15.303 L 12.946 8.232 L 14.125 9.411 L 15.303 8.232 L 14.125 7.054 L 15.303 5.875 L 14.125 4.697 L 12.946 5.875 L 11.768 4.697 L 10.589 5.875 L 11.768 7.054 Z M 8.232 5.875 L 9.411 4.697 L 10.589 5.875 L 9.411 7.054 Z M 8.232 5.875 L 7.054 7.054 L 5.875 5.875 L 7.054 4.697 Z M 14.125 11.768 L 15.303 10.589 L 14.125 9.411 L 12.946 10.589 Z M 14.125 11.768 L 12.946 12.946 L 14.125 14.125 L 15.303 12.946 Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </a>
-          </div>
+              <path
+                d="M 4.697 14.125 L 5.875 15.303 L 12.946 8.232 L 14.125 9.411 L 15.303 8.232 L 14.125 7.054 L 15.303 5.875 L 14.125 4.697 L 12.946 5.875 L 11.768 4.697 L 10.589 5.875 L 11.768 7.054 Z M 8.232 5.875 L 9.411 4.697 L 10.589 5.875 L 9.411 7.054 Z M 8.232 5.875 L 7.054 7.054 L 5.875 5.875 L 7.054 4.697 Z M 14.125 11.768 L 15.303 10.589 L 14.125 9.411 L 12.946 10.589 Z M 14.125 11.768 L 12.946 12.946 L 14.125 14.125 L 15.303 12.946 Z"
+                fill="currentColor"
+              />
+            </svg>
+          </a>
         </div>
       </div>
     </section>

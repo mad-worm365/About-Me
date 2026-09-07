@@ -209,19 +209,23 @@ body {
 @keyframes click-spark {
   0% {
     opacity: 0;
-    transform: scale(0.35) rotate(0deg);
+    transform: translate(-50%, -50%) rotate(var(--spark-rot, 0deg))
+      scale(calc(var(--spark-scale, 1) * 0.35));
   }
   18% {
     opacity: 1;
-    transform: scale(1.05) rotate(8deg);
+    transform: translate(-50%, -50%) rotate(calc(var(--spark-rot, 0deg) + 8deg))
+      scale(calc(var(--spark-scale, 1) * 1.08));
   }
   55% {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: translate(-50%, -50%) rotate(var(--spark-rot, 0deg))
+      scale(var(--spark-scale, 1));
   }
   100% {
     opacity: 0;
-    transform: scale(1.35) rotate(-6deg);
+    transform: translate(-50%, -50%) rotate(calc(var(--spark-rot, 0deg) - 6deg))
+      scale(calc(var(--spark-scale, 1) * 1.35));
   }
 }
 
@@ -470,11 +474,11 @@ html.custom-cursor [contenteditable="true"] {
 }
 
 .cta-warp {
-  min-height: 280px;
+  width: 100%;
+  min-height: 260px;
   background:
-    radial-gradient(ellipse 70% 90% at 50% 50%, rgba(15, 23, 42, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 90% at 50% 50%, rgba(15, 23, 42, 0.15) 0%, transparent 55%),
     linear-gradient(135deg, #0b1224 0%, #111827 45%, #0f172a 100%);
-  box-shadow: 0 24px 70px -28px rgba(15, 23, 42, 0.55);
 }
 
 .cta-warp-canvas {

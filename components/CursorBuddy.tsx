@@ -6,6 +6,8 @@ type ClickBurst = {
   id: number;
   x: number;
   y: number;
+  rotate: number;
+  scale: number;
 };
 
 export function CursorBuddy() {
@@ -34,7 +36,16 @@ export function CursorBuddy() {
     const onClick = (event: MouseEvent) => {
       const id = ++burstId;
       setClicking(true);
-      setBursts((current) => [...current.slice(-3), { id, x: event.clientX, y: event.clientY }]);
+      setBursts((current) => [
+        ...current.slice(-4),
+        {
+          id,
+          x: event.clientX,
+          y: event.clientY,
+          rotate: -16 + Math.random() * 32,
+          scale: 0.9 + Math.random() * 0.25,
+        },
+      ]);
 
       if (clickTimer.current) window.clearTimeout(clickTimer.current);
       clickTimer.current = window.setTimeout(() => setClicking(false), 1000);
@@ -78,9 +89,24 @@ export function CursorBuddy() {
       {bursts.map((burst) => (
         <span
           key={burst.id}
-          className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 animate-[click-particle_1s_ease-out_forwards] rounded-full bg-white/90"
-          style={{ left: burst.x, top: burst.y }}
-        />
+          className="absolute animate-[click-spark_1s_ease-out_forwards]"
+          style={{
+            left: burst.x,
+            top: burst.y,
+            ["--spark-rot" as string]: `${burst.rotate}deg`,
+            ["--spark-scale" as string]: burst.scale,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/cursors/click-spark.png"
+            alt=""
+            width={48}
+            height={48}
+            className="h-12 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+            draggable={false}
+          />
+        </span>
       ))}
     </div>
   );
@@ -96,47 +122,44 @@ function HandIdle() {
         strokeWidth="3.2"
         strokeLinejoin="round"
       />
-      <circle cx="22" cy="58" r="1.4" fill="white" opacity="0.9" />
-      <circle cx="30" cy="62" r="1.1" fill="white" opacity="0.75" />
-      <circle cx="38" cy="58" r="1.2" fill="white" opacity="0.8" />
     </svg>
   );
 }
 
 function HandTap() {
   return (
-    <svg
-      viewBox="0 0 72 72"
-      className="h-14 w-14 animate-[hand-tap_1s_ease-out_forwards] drop-shadow-md"
-      fill="none"
-    >
-      <path
-        d="M18 10c6-4 12-1 14 4"
-        stroke="#E07A3A"
-        strokeWidth="2.2"
-        strokeLinecap="round"
+    <div className="relative h-16 w-16 animate-[hand-tap_1s_ease-out_forwards]">
+      <svg viewBox="0 0 72 72" className="h-14 w-14 drop-shadow-md" fill="none">
+        <path
+          d="M18 10c6-4 12-1 14 4"
+          stroke="#E07A3A"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 6c5-2 10 0 12 4"
+          stroke="#E07A3A"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M34 10c-3.4 0-6 2.8-6 6.2V36.5l-5-4.2a4.6 4.6 0 0 0-6.7.5 4.5 4.5 0 0 0 .6 6.4l11.2 9.4c1.8 1.5 4.1 2.3 6.5 2.3H48c5.5 0 10-4.3 10-9.6V24.8c0-3.2-2.6-5.8-5.8-5.8-1 0-2 .3-2.8.8v-3.6c0-3.4-2.6-6.2-6-6.2-1.2 0-2.3.3-3.2.9V16.2c0-3.4-2.6-6.2-6.2-6.2Z"
+          fill="white"
+          stroke="#E07A3A"
+          strokeWidth="3.2"
+          strokeLinejoin="round"
+          transform="rotate(28 36 36)"
+        />
+      </svg>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cursors/click-spark.png"
+        alt=""
+        width={36}
+        height={36}
+        className="absolute right-0 bottom-0 h-9 w-9 drop-shadow-[0_0_8px_rgba(255,255,255,0.55)]"
+        draggable={false}
       />
-      <path
-        d="M24 6c5-2 10 0 12 4"
-        stroke="#E07A3A"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M34 10c-3.4 0-6 2.8-6 6.2V36.5l-5-4.2a4.6 4.6 0 0 0-6.7.5 4.5 4.5 0 0 0 .6 6.4l11.2 9.4c1.8 1.5 4.1 2.3 6.5 2.3H48c5.5 0 10-4.3 10-9.6V24.8c0-3.2-2.6-5.8-5.8-5.8-1 0-2 .3-2.8.8v-3.6c0-3.4-2.6-6.2-6-6.2-1.2 0-2.3.3-3.2.9V16.2c0-3.4-2.6-6.2-6.2-6.2Z"
-        fill="white"
-        stroke="#E07A3A"
-        strokeWidth="3.2"
-        strokeLinejoin="round"
-        transform="rotate(28 36 36)"
-      />
-      <path
-        d="M48 52 52 44 60 48 54 54 58 62 48 56 40 62 44 54 36 50 44 48Z"
-        fill="white"
-        stroke="#E07A3A"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
-    </svg>
+    </div>
   );
 }
