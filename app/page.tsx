@@ -15,7 +15,6 @@ import { Projects } from "@/components/Projects";
 import { Skills } from "@/components/Skills";
 import { Stats } from "@/components/Stats";
 import { Testimonials } from "@/components/Testimonials";
-import { WarpCTA } from "@/components/WarpCTA";
 
 export default function Home() {
   return (
@@ -25,7 +24,6 @@ export default function Home() {
       <div className="ocean-ui flex min-h-full flex-col">
         <IntroSplash />
         <Navbar />
-        <WarpCTA />
         <main>
           <Hero />
           <Stats />
