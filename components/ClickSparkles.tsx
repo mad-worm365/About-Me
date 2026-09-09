@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 
 type Particle = {
   id: number;
-  x: number;
-  y: number;
-  angle: number;
-  dist: number;
+  dx: number;
+  dy: number;
   size: number;
-  kind: "ray" | "dot" | "speck";
+  kind: "star" | "dot" | "speck";
   delay: number;
   hue: "white" | "ice";
+  spin: number;
 };
 
 type Burst = {
@@ -27,52 +26,36 @@ function makeBurst(x: number, y: number): Burst {
   const particles: Particle[] = [];
   let pid = 0;
 
-  // 4 cardinal rays (cross) — matches the GIF's main streaks
-  for (let i = 0; i < 4; i += 1) {
-    const angle = (i * Math.PI) / 2 + (Math.random() - 0.5) * 0.12;
-    particles.push({
-      id: pid++,
-      x,
-      y,
-      angle,
-      dist: 28 + Math.random() * 14,
-      size: 2.2 + Math.random() * 1.4,
-      kind: "ray",
-      delay: 0,
-      hue: "white",
-    });
-  }
-
-  // Expanding ring of dots
-  const ringCount = 10;
-  for (let i = 0; i < ringCount; i += 1) {
-    const angle = (i / ringCount) * Math.PI * 2 + Math.random() * 0.2;
-    particles.push({
-      id: pid++,
-      x,
-      y,
-      angle,
-      dist: 14 + Math.random() * 10,
-      size: 1.4 + Math.random() * 1.6,
-      kind: "dot",
-      delay: Math.random() * 40,
-      hue: Math.random() > 0.65 ? "ice" : "white",
-    });
-  }
-
-  // Outer scatter / diagonal flecks
-  for (let i = 0; i < 8; i += 1) {
+  // Several 4-point sparks, each in a fully random direction
+  const starCount = 5 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < starCount; i += 1) {
     const angle = Math.random() * Math.PI * 2;
+    const dist = 24 + Math.random() * 36;
     particles.push({
       id: pid++,
-      x,
-      y,
-      angle,
-      dist: 22 + Math.random() * 26,
-      size: 1 + Math.random() * 2.2,
-      kind: "speck",
-      delay: 20 + Math.random() * 60,
-      hue: Math.random() > 0.5 ? "ice" : "white",
+      dx: Math.cos(angle) * dist,
+      dy: Math.sin(angle) * dist,
+      size: 14 + Math.random() * 10,
+      kind: "star",
+      delay: Math.random() * 50,
+      hue: Math.random() > 0.7 ? "ice" : "white",
+      spin: (Math.random() - 0.5) * 40,
+    });
+  }
+
+  // Extra flecks also in random directions
+  for (let i = 0; i < 10; i += 1) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 12 + Math.random() * 34;
+    particles.push({
+      id: pid++,
+      dx: Math.cos(angle) * dist,
+      dy: Math.sin(angle) * dist,
+      size: 1.2 + Math.random() * 2.4,
+      kind: Math.random() > 0.45 ? "dot" : "speck",
+      delay: Math.random() * 70,
+      hue: Math.random() > 0.55 ? "ice" : "white",
+      spin: 0,
     });
   }
 
@@ -90,7 +73,6 @@ export function ClickSparkles() {
     setEnabled(true);
 
     const onPointerDown = (event: PointerEvent) => {
-      // Skip text fields so caret still feels normal
       const target = event.target as HTMLElement | null;
       if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
 
@@ -99,7 +81,7 @@ export function ClickSparkles() {
 
       const timer = window.setTimeout(() => {
         setBursts((current) => current.filter((b) => b.id !== burst.id));
-      }, 520);
+      }, 560);
       timers.current.push(timer);
     };
 
@@ -116,23 +98,52 @@ export function ClickSparkles() {
     <div className="pointer-events-none fixed inset-0 z-90" aria-hidden>
       {bursts.map((burst) => (
         <span key={burst.id} className="absolute inset-0">
-          {burst.particles.map((p) => (
-            <i
-              key={p.id}
-              className={`click-spark-particle click-spark-${p.kind} click-spark-${p.hue}`}
-              style={{
-                left: burst.x,
-                top: burst.y,
-                width: p.size,
-                height: p.kind === "ray" ? p.size * 3.2 : p.size,
-                ["--spark-angle" as string]: `${p.angle}rad`,
-                ["--spark-dist" as string]: `${p.dist}px`,
-                animationDelay: `${p.delay}ms`,
-              }}
-            />
-          ))}
+          {burst.particles.map((p) =>
+            p.kind === "star" ? (
+              <span
+                key={p.id}
+                className={`click-spark-particle click-spark-star click-spark-${p.hue}`}
+                style={{
+                  left: burst.x,
+                  top: burst.y,
+                  width: p.size,
+                  height: p.size,
+                  ["--spark-dx" as string]: `${p.dx}px`,
+                  ["--spark-dy" as string]: `${p.dy}px`,
+                  ["--spark-spin" as string]: `${p.spin}deg`,
+                  animationDelay: `${p.delay}ms`,
+                }}
+              >
+                <SparkIcon />
+              </span>
+            ) : (
+              <i
+                key={p.id}
+                className={`click-spark-particle click-spark-${p.kind} click-spark-${p.hue}`}
+                style={{
+                  left: burst.x,
+                  top: burst.y,
+                  width: p.size,
+                  height: p.size,
+                  ["--spark-dx" as string]: `${p.dx}px`,
+                  ["--spark-dy" as string]: `${p.dy}px`,
+                  ["--spark-spin" as string]: "0deg",
+                  animationDelay: `${p.delay}ms`,
+                }}
+              />
+            ),
+          )}
         </span>
       ))}
     </div>
+  );
+}
+
+function SparkIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="h-full w-full" fill="currentColor" aria-hidden>
+      <path d="M32 4 34.2 26.5 52 20 37.5 32 52 44 34.2 37.5 32 60 29.8 37.5 12 44 26.5 32 12 20 29.8 26.5Z" />
+      <circle cx="32" cy="32" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+    </svg>
   );
 }
