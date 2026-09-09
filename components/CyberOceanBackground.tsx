@@ -168,19 +168,19 @@ varying float vFogDepth;
 float caustics(vec2 uv, float time) {
   vec2 p = uv * 8.0;
   float c = 0.0;
-  c += sin(p.x * 2.0 - time * 1.5 + sin(p.y * 3.0 - time * 0.8));
-  c += sin(p.y * 3.0 - time * 1.2 + sin(p.x * 2.5 - time * 0.5));
-  c += sin((p.x + p.y) * 1.5 - time);
+  c += sin(p.x * 2.0 + time * 1.5 + sin(p.y * 3.0 + time * 0.8));
+  c += sin(p.y * 3.0 + time * 1.2 + sin(p.x * 2.5 + time * 0.5));
+  c += sin((p.x + p.y) * 1.5 + time);
   return c * 0.25 + 0.5;
 }
 
 void main() {
   vec2 uv = vUv;
-  float wave1 = sin(uv.x * 10.0 - uTime * 0.8) * 0.02;
-  float wave2 = cos(uv.y * 8.0 - uTime * 0.6) * 0.02;
+  float wave1 = sin(uv.x * 10.0 + uTime * 0.8) * 0.02;
+  float wave2 = cos(uv.y * 8.0 + uTime * 0.6) * 0.02;
   vec2 dUv = uv + vec2(wave1, wave2);
   float dist = length(dUv - 0.5);
-  float pattern = caustics(dUv, uTime) * 0.6 + (sin(dist * 15.0 + uTime * 1.5) * 0.5 + 0.5) * 0.2;
+  float pattern = caustics(dUv, uTime) * 0.6 + (sin(dist * 15.0 - uTime * 1.5) * 0.5 + 0.5) * 0.2;
   vec3 color = mix(uColor1, uColor2, pattern);
   color = mix(color, uColor3, pow(caustics(dUv, uTime), 2.0) * 0.5);
   color = mix(color * 0.35, color, smoothstep(0.0, 1.0, vUv.y));
@@ -194,8 +194,30 @@ void main() {
 }
 `;
 
+const SWIM_DURATION = 18;
+const PATH_RADIUS = 3.2;
+
+function createSwimPath() {
+  const points: THREE.Vector3[] = [];
+  const segments = 12;
+  for (let i = 0; i < segments; i += 1) {
+    const angle = (i / segments) * Math.PI * 2;
+    points.push(
+      new THREE.Vector3(
+        Math.cos(angle) * PATH_RADIUS,
+        0.2 + Math.sin(angle * 2) * 0.4,
+        Math.sin(angle) * PATH_RADIUS * 0.8,
+      ),
+    );
+  }
+  return new THREE.CatmullRomCurve3(points, true, "centripetal", 0.5);
+}
+
 function AnimatedDolphin() {
-  const group = useRef<Group>(null);
+  const pathGroup = useRef<Group>(null);
+  const animGroup = useRef<Group>(null);
+  const lookTarget = useRef(new THREE.Vector3());
+  const path = useMemo(() => createSwimPath(), []);
   const sparklesRef = useRef<Points>(null);
   const linesRef = useRef<LineSegments>(null);
   const skinnedRef = useRef<SkinnedMesh | null>(null);
@@ -260,7 +282,7 @@ function AnimatedDolphin() {
       sampler.sample(tempPos, tempNormal);
       let closest = 0;
       let best = Infinity;
-      for (let v = 0; v < posAttr.count; v += 8) {
+      for (let v = 0; v < posAttr.count; v += 2) {
         search.fromBufferAttribute(posAttr, v);
         const d = search.distanceToSquared(tempPos);
         if (d < best) {
@@ -268,9 +290,10 @@ function AnimatedDolphin() {
           closest = v;
         }
       }
+      search.fromBufferAttribute(posAttr, closest);
       sampled.push({
         vertexIndex: closest,
-        offset: tempPos.clone().sub(search.fromBufferAttribute(posAttr, closest)),
+        offset: tempPos.clone().sub(search),
         normal: tempNormal.clone(),
         random: Math.random(),
         size: Math.random() * 0.5 + 0.5,
@@ -302,7 +325,9 @@ function AnimatedDolphin() {
         uSize: { value: 28 },
         uColor1: { value: new THREE.Color(0x327fe2) },
         uColor2: { value: new THREE.Color(0x91cdff) },
-        uPixelRatio: { value: Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2) },
+        uPixelRatio: {
+          value: Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2),
+        },
       },
     });
 
@@ -317,7 +342,7 @@ function AnimatedDolphin() {
     return { geometry, material, linesGeometry, linePositions, lineColors, count };
   }, [model]);
 
-  const { actions, mixer } = useAnimations(animations, group);
+  const { actions, mixer } = useAnimations(animations, animGroup);
 
   useEffect(() => {
     const clipName = Object.keys(actions)[0];
@@ -335,7 +360,7 @@ function AnimatedDolphin() {
 
     action.reset();
     action.setLoop(THREE.LoopRepeat, Infinity);
-    action.setEffectiveTimeScale(1.1);
+    action.setEffectiveTimeScale(1.15);
     action.fadeIn(0.35).play();
     return () => {
       action.fadeOut(0.15);
@@ -349,6 +374,25 @@ function AnimatedDolphin() {
       sparkleData.material.uniforms.uTime.value = t;
     }
 
+    // Swim along the loop path
+    if (pathGroup.current) {
+      const u = (t % SWIM_DURATION) / SWIM_DURATION;
+      const point = path.getPointAt(u);
+      const tangent = path.getTangentAt(u).normalize();
+
+      pathGroup.current.position.set(point.x, point.y, point.z);
+      pathGroup.current.position.y += Math.sin(t * 2.1) * 0.06;
+
+      lookTarget.current.copy(point).addScaledVector(tangent, 2);
+      pathGroup.current.lookAt(lookTarget.current);
+      pathGroup.current.rotateY(Math.PI);
+
+      if (animGroup.current) {
+        animGroup.current.rotation.z = Math.sin(t * 2.0) * 0.08;
+        animGroup.current.rotation.x = Math.sin(t * 1.5) * 0.04;
+      }
+    }
+
     const mesh = skinnedRef.current;
     const sparkles = sparklesRef.current;
     const lines = linesRef.current;
@@ -360,26 +404,31 @@ function AnimatedDolphin() {
 
     const posAttr = sparkles.geometry.getAttribute("position") as THREE.BufferAttribute;
     const geoPos = mesh.geometry.getAttribute("position");
-    const connectionDist = 0.16;
+    const connectionDist = 0.18;
     const connectionDistSq = connectionDist * connectionDist;
     let lineCount = 0;
+    const meshAny = mesh as SkinnedMesh & {
+      applyBoneTransform?: (index: number, target: THREE.Vector3) => THREE.Vector3;
+      boneTransform?: (index: number, target: THREE.Vector3) => THREE.Vector3;
+    };
 
     for (let i = 0; i < sampled.length; i += 1) {
       const sample = sampled[i];
       tmp.base.fromBufferAttribute(geoPos, sample.vertexIndex);
       tmp.normal.copy(sample.normal).normalize();
-      tmp.local.copy(tmp.base).addScaledVector(tmp.normal, 0.017);
+      tmp.local.copy(tmp.base).add(sample.offset).addScaledVector(tmp.normal, 0.012);
 
-      if (typeof (mesh as SkinnedMesh & { applyBoneTransform?: Function }).applyBoneTransform === "function") {
+      if (typeof meshAny.applyBoneTransform === "function") {
         tmp.skinned.copy(tmp.local);
-        (mesh as SkinnedMesh & { applyBoneTransform: Function }).applyBoneTransform(
-          sample.vertexIndex,
-          tmp.skinned,
-        );
+        meshAny.applyBoneTransform(sample.vertexIndex, tmp.skinned);
+        tmp.skinned.applyMatrix4(mesh.matrixWorld);
+      } else if (typeof meshAny.boneTransform === "function") {
+        tmp.skinned.copy(tmp.local);
+        meshAny.boneTransform(sample.vertexIndex, tmp.skinned);
         tmp.skinned.applyMatrix4(mesh.matrixWorld);
       } else if (typeof mesh.getVertexPosition === "function") {
         mesh.getVertexPosition(sample.vertexIndex, tmp.skinned);
-        tmp.skinned.addScaledVector(tmp.normal, 0.017);
+        tmp.skinned.add(sample.offset).addScaledVector(tmp.normal, 0.012);
         mesh.localToWorld(tmp.skinned);
       } else {
         tmp.skinned.copy(tmp.local).applyMatrix4(mesh.matrixWorld);
@@ -389,15 +438,14 @@ function AnimatedDolphin() {
     }
     posAttr.needsUpdate = true;
 
-    // sparse connection lines
     if (lines) {
       const lp = sparkleData.linePositions;
       const lc = sparkleData.lineColors;
-      for (let i = 0; i < sampled.length; i += 3) {
+      for (let i = 0; i < sampled.length; i += 4) {
         const ax = posAttr.getX(i);
         const ay = posAttr.getY(i);
         const az = posAttr.getZ(i);
-        for (let j = i + 1; j < Math.min(i + 18, sampled.length); j += 1) {
+        for (let j = i + 1; j < Math.min(i + 16, sampled.length); j += 1) {
           const bx = posAttr.getX(j);
           const by = posAttr.getY(j);
           const bz = posAttr.getZ(j);
@@ -413,10 +461,10 @@ function AnimatedDolphin() {
           lp[idx + 3] = bx;
           lp[idx + 4] = by;
           lp[idx + 5] = bz;
-          const mix = 0.4 + Math.random() * 0.6;
+          const mix = 0.4 + ((i * 17 + j) % 10) * 0.06;
           tmp.colorA.set(0x327fe2);
           tmp.colorB.set(0x91cdff);
-          const col = tmp.colorA.lerp(tmp.colorB, mix);
+          const col = tmp.colorA.clone().lerp(tmp.colorB, mix);
           lc[idx] = col.r;
           lc[idx + 1] = col.g;
           lc[idx + 2] = col.b;
@@ -433,16 +481,21 @@ function AnimatedDolphin() {
   });
 
   return (
-    <group ref={group} position={[0, 0.35, 0]} rotation={[0, Math.PI * 0.2, 0]} scale={1.65}>
-      <primitive object={model} />
+    <>
+      <group ref={pathGroup}>
+        <group ref={animGroup} scale={1.55}>
+          <primitive object={model} />
+        </group>
+      </group>
       {sparkleData && (
         <>
-          <points ref={sparklesRef} geometry={sparkleData.geometry} material={sparkleData.material} frustumCulled={false} />
-          <lineSegments
-            ref={linesRef}
-            geometry={sparkleData.linesGeometry}
+          <points
+            ref={sparklesRef}
+            geometry={sparkleData.geometry}
+            material={sparkleData.material}
             frustumCulled={false}
-          >
+          />
+          <lineSegments ref={linesRef} geometry={sparkleData.linesGeometry} frustumCulled={false}>
             <lineBasicMaterial
               vertexColors
               transparent
@@ -453,7 +506,7 @@ function AnimatedDolphin() {
           </lineSegments>
         </>
       )}
-    </group>
+    </>
   );
 }
 
@@ -503,7 +556,7 @@ function Seabed() {
 
   useFrame(({ clock }) => {
     material.uniforms.uTime.value = clock.elapsedTime;
-    material.uniforms.uScrollOffset.value = clock.elapsedTime * 2.8;
+    material.uniforms.uScrollOffset.value = -clock.elapsedTime * 2.8;
   });
 
   return (
@@ -573,8 +626,9 @@ function SpeedLines() {
     if (!group.current) return;
     group.current.children.forEach((child, i) => {
       const cfg = lines[i];
-      child.position.z += cfg.speed * delta;
-      if (child.position.z > 35) child.position.z = -55;
+      // Flow opposite the dolphin's nose so it reads as swimming forward
+      child.position.z -= cfg.speed * delta;
+      if (child.position.z < -55) child.position.z = 35;
     });
   });
 
