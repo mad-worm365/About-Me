@@ -10,6 +10,7 @@ import { Hero } from "@/components/Hero";
 import { IntroSplash } from "@/components/IntroSplash";
 import { Navbar } from "@/components/Navbar";
 import { OceanBackdrop } from "@/components/OceanBackdrop";
+import { OceanHUD } from "@/components/OceanHUD";
 import { Projects } from "@/components/Projects";
 import { Skills } from "@/components/Skills";
 import { Stats } from "@/components/Stats";
@@ -20,6 +21,7 @@ export default function Home() {
   return (
     <>
       <OceanBackdrop />
+      <OceanHUD />
       <div className="ocean-ui flex min-h-full flex-col">
         <IntroSplash />
         <Navbar />

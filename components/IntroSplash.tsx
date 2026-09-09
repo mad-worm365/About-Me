@@ -86,8 +86,9 @@ export function IntroSplash() {
           type="button"
           onClick={skipNow}
           className="mt-4 font-mono text-[11px] tracking-[0.16em] text-slate-400 transition hover:text-cyan-200"
+          style={{ animation: "intro-btn-in 0.55s ease 0.35s both" }}
         >
-          or continue without sound
+          or continue to portfolio
         </button>
       </div>
     </div>
