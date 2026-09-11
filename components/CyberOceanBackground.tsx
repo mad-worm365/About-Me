@@ -156,6 +156,7 @@ void main() {
 
 const TUNNEL_FRAG = /* glsl */ `
 uniform float uTime;
+uniform float uScroll;
 uniform vec3 uColor1;
 uniform vec3 uColor2;
 uniform vec3 uColor3;
@@ -175,7 +176,8 @@ float caustics(vec2 uv, float time) {
 }
 
 void main() {
-  vec2 uv = vUv;
+  // Scroll along tunnel length so the world rushes past a fixed dolphin
+  vec2 uv = vec2(vUv.x, fract(vUv.y + uScroll));
   float wave1 = sin(uv.x * 10.0 + uTime * 0.8) * 0.02;
   float wave2 = cos(uv.y * 8.0 + uTime * 0.6) * 0.02;
   vec2 dUv = uv + vec2(wave1, wave2);
@@ -194,30 +196,9 @@ void main() {
 }
 `;
 
-const SWIM_DURATION = 18;
-const PATH_RADIUS = 3.2;
-
-function createSwimPath() {
-  const points: THREE.Vector3[] = [];
-  const segments = 12;
-  for (let i = 0; i < segments; i += 1) {
-    const angle = (i / segments) * Math.PI * 2;
-    points.push(
-      new THREE.Vector3(
-        Math.cos(angle) * PATH_RADIUS,
-        0.2 + Math.sin(angle * 2) * 0.4,
-        Math.sin(angle) * PATH_RADIUS * 0.8,
-      ),
-    );
-  }
-  return new THREE.CatmullRomCurve3(points, true, "centripetal", 0.5);
-}
-
 function AnimatedDolphin() {
-  const pathGroup = useRef<Group>(null);
+  const rootGroup = useRef<Group>(null);
   const animGroup = useRef<Group>(null);
-  const lookTarget = useRef(new THREE.Vector3());
-  const path = useMemo(() => createSwimPath(), []);
   const sparklesRef = useRef<Points>(null);
   const linesRef = useRef<LineSegments>(null);
   const skinnedRef = useRef<SkinnedMesh | null>(null);
@@ -374,23 +355,10 @@ function AnimatedDolphin() {
       sparkleData.material.uniforms.uTime.value = t;
     }
 
-    // Swim along the loop path
-    if (pathGroup.current) {
-      const u = (t % SWIM_DURATION) / SWIM_DURATION;
-      const point = path.getPointAt(u);
-      const tangent = path.getTangentAt(u).normalize();
-
-      pathGroup.current.position.set(point.x, point.y, point.z);
-      pathGroup.current.position.y += Math.sin(t * 2.1) * 0.06;
-
-      lookTarget.current.copy(point).addScaledVector(tangent, 2);
-      pathGroup.current.lookAt(lookTarget.current);
-      pathGroup.current.rotateY(Math.PI);
-
-      if (animGroup.current) {
-        animGroup.current.rotation.z = Math.sin(t * 2.0) * 0.08;
-        animGroup.current.rotation.x = Math.sin(t * 1.5) * 0.04;
-      }
+    // Stay fixed in world space — only the swim clip + light bank sell motion
+    if (animGroup.current) {
+      animGroup.current.rotation.z = Math.sin(t * 2.0) * 0.05;
+      animGroup.current.rotation.x = Math.sin(t * 1.5) * 0.025;
     }
 
     const mesh = skinnedRef.current;
@@ -482,7 +450,8 @@ function AnimatedDolphin() {
 
   return (
     <>
-      <group ref={pathGroup}>
+      {/* Fixed center: background scrolls past so the dolphin reads as swimming */}
+      <group ref={rootGroup} position={[0, 0.25, 0]} rotation={[0, 0, 0]}>
         <group ref={animGroup} scale={1.55}>
           <primitive object={model} />
         </group>
@@ -556,7 +525,7 @@ function Seabed() {
 
   useFrame(({ clock }) => {
     material.uniforms.uTime.value = clock.elapsedTime;
-    material.uniforms.uScrollOffset.value = -clock.elapsedTime * 2.8;
+    material.uniforms.uScrollOffset.value = -clock.elapsedTime * 4.2;
   });
 
   return (
@@ -582,6 +551,7 @@ function WormholeTunnel() {
         blending: THREE.AdditiveBlending,
         uniforms: {
           uTime: { value: 0 },
+          uScroll: { value: 0 },
           uColor1: { value: new THREE.Color(0x001235) },
           uColor2: { value: new THREE.Color(0x0a4d6e) },
           uColor3: { value: new THREE.Color(0x2eb8e6) },
@@ -595,6 +565,7 @@ function WormholeTunnel() {
 
   useFrame(({ clock }) => {
     mat.uniforms.uTime.value = clock.elapsedTime;
+    mat.uniforms.uScroll.value = clock.elapsedTime * 0.12;
   });
 
   return (
@@ -615,7 +586,7 @@ function SpeedLines() {
         x: Math.cos(angle) * radius,
         y: (Math.random() - 0.4) * 10,
         z: -40 + Math.random() * 80,
-        speed: 8 + Math.random() * 14,
+        speed: 12 + Math.random() * 18,
         len: 1.2 + Math.random() * 2.5,
         color: [0x00ffff, 0x00a1ff, 0x91cdff][Math.floor(Math.random() * 3)],
       };
@@ -652,13 +623,23 @@ function OceanDust() {
     for (let i = 0; i < count; i += 1) {
       data[i * 3] = (Math.random() - 0.5) * 40;
       data[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      data[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      data[i * 3 + 2] = (Math.random() - 0.5) * 80;
     }
     return data;
   }, []);
 
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.rotation.y = clock.elapsedTime * 0.015;
+  useFrame((_, delta) => {
+    const points = ref.current;
+    if (!points) return;
+    const attr = points.geometry.getAttribute("position") as THREE.BufferAttribute;
+    const arr = attr.array as Float32Array;
+    const drift = 6 * delta;
+    for (let i = 0; i < count; i += 1) {
+      const zi = i * 3 + 2;
+      arr[zi] -= drift;
+      if (arr[zi] < -40) arr[zi] = 40;
+    }
+    attr.needsUpdate = true;
   });
 
   return (
